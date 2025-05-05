@@ -8,7 +8,13 @@ RUN composer install --no-dev --optimize-autoloader
 
 # Stage 2: Production stage (Nginx + PHP-FPM)
 FROM php:8.1-fpm-alpine
-RUN apk add --no-cache nginx curl libcurl
+RUN apk add --no-cache nginx curl libcurl && \
+apk add --no-cache --virtual .build-deps \
+    postgresql-dev \
+    && apk add --no-cache libpq \
+    && docker-php-ext-install pgsql \
+    && apk del .build-deps
+
 WORKDIR /app
 
 # Copy the vendor directory from the builder stage to /dependencies
